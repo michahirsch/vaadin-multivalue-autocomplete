@@ -21,6 +21,8 @@
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
       <java.version>1.8</java.version>
       <vaadin.plugin.version>7.6.8</vaadin.plugin.version>
+      <antlr4.plugin.version>4.5</antlr4.plugin.version>
+      <antlr4.version>4.5</antlr4.version>
    </properties>
 
    <build>
@@ -85,6 +87,24 @@
                </execution>
             </executions>
          </plugin>
+         
+         <plugin>
+            <groupId>org.antlr</groupId>
+            <artifactId>antlr4-maven-plugin</artifactId>
+            <version>${antlr4.plugin.version}</version>
+            <configuration>
+               <arguments>
+                  <argument>-visitor</argument>
+               </arguments>
+            </configuration>
+            <executions>
+               <execution>
+                  <goals>
+                     <goal>antlr4</goal>
+                  </goals>
+               </execution>
+            </executions>
+         </plugin>
       </plugins>
    </build>
 
@@ -120,6 +140,17 @@
          <groupId>com.vaadin</groupId>
          <artifactId>vaadin-spring-boot-starter</artifactId>
          <version>1.0.0</version>
+      </dependency>
+       <dependency>
+         <groupId>org.antlr</groupId>
+         <artifactId>antlr4-runtime</artifactId>
+         <version>${antlr4.version}</version>
+      </dependency>
+
+      <dependency>
+         <groupId>org.antlr</groupId>
+         <artifactId>antlr4-maven-plugin</artifactId>
+         <version>${antlr4.plugin.version}</version>
       </dependency>
 
       <dependency>
