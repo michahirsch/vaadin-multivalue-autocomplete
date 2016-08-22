@@ -17,8 +17,7 @@ public class SuggestionErrorListener extends BaseErrorListener {
             final String arg4, final RecognitionException arg5) {
         final RsqlParser parser = (RsqlParser) arg0;
         final CommonToken token = (CommonToken) arg1;
-
-        errorToken = new SuggestionToken(token, parser.getExpectedTokensWithinCurrentRule().getMinElement());
+        errorToken = new SuggestionToken(token, parser.getExpectedTokensWithinCurrentRule());
         errorOccurred = true;
     }
 

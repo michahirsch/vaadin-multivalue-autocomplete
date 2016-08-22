@@ -11,26 +11,30 @@ package com.bosch.example.ui.component;
 import java.util.List;
 
 import com.bosch.example.rsql.suggestion.RsqlSuggestionHelper.SuggestionContext;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.event.ShortcutListener;
+import com.vaadin.ui.ListSelect;
 import com.vaadin.ui.Window;
 
 public class SuggestionWindow extends Window {
 
-    private final VerticalLayout rootLayout = new VerticalLayout();
+    private final ListSelect select = new ListSelect("Suggestions");
+    private final SuggestionCallback suggestionCallback;
 
-    public SuggestionWindow(final SuggestionContext context, final SuggestionCallback suggestionCallback) {
+    public SuggestionWindow(final SuggestionCallback suggestionCallback) {
         setModal(false);
         setDraggable(false);
         setImmediate(true);
         setClosable(false);
         setResizable(false);
-        setContent(rootLayout);
-        buildLayout(context, suggestionCallback);
+        setContent(select);
+        select.setNullSelectionAllowed(false);
+        select.setRows(4);
+        select.setMultiSelect(false);
+        this.suggestionCallback = suggestionCallback;
     }
 
-    private void buildLayout(final SuggestionContext context, final SuggestionCallback suggestionCallback) {
-
+    public void update(final SuggestionContext context) {
+        select.focus();
         final List<String> suggestions;
         if (context.isSyntaxError()) {
             suggestions = context.getSyntaxErrorContext().getSuggestions();
@@ -40,19 +44,30 @@ public class SuggestionWindow extends Window {
 
         if (suggestions != null) {
             suggestions.forEach(suggestion -> {
-                final Button label = new Button(suggestion);
-                rootLayout.addComponent(label);
-                label.addClickListener((event) -> {
-                    close();
-                    suggestionCallback.selected(event.getButton().getCaption());
-                });
+                select.addItem(suggestion);
             });
         }
-
+        select.addShortcutListener(new EnterShortCutListener());
     }
 
     @FunctionalInterface
     public interface SuggestionCallback {
         void selected(final String suggestion);
+    }
+
+    private final class EnterShortCutListener extends ShortcutListener {
+
+        private static final long serialVersionUID = 1L;
+
+        public EnterShortCutListener() {
+            super("Enter", KeyCode.ENTER, new int[] {});
+        }
+
+        @Override
+        public void handleAction(final Object sender, final Object target) {
+            final Object value = select.getValue();
+            suggestionCallback.selected(String.valueOf(value));
+        }
+
     }
 }

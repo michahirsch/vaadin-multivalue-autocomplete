@@ -20,6 +20,7 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.TokenSource;
 import org.antlr.v4.runtime.TokenStream;
+import org.antlr.v4.runtime.misc.IntervalSet;
 
 import com.google.gwt.thirdparty.guava.common.base.Throwables;
 
@@ -56,8 +57,16 @@ public class RsqlSuggestionHelper {
             final Token errorToken = errorListener.getErrorToken().getToken();
             errorContext.tokenStart = errorToken.getStartIndex();
             errorContext.tokenEnd = errorToken.getStopIndex();
-            errorContext.suggestions = SuggestionMap.getSuggestions(
-                    parser.getVocabulary().getSymbolicName(errorListener.getErrorToken().getExpectedTokenType()));
+
+            final IntervalSet expectedTokenType = errorListener.getErrorToken().getExpectedTokenType();
+            expectedTokenType.getIntervals().forEach(interval -> {
+                final int start = interval.a;
+                final int end = interval.b;
+                for (int index = start; index <= end; index++) {
+                    final String symbolicName = parser.getVocabulary().getSymbolicName(index);
+                    errorContext.suggestions.addAll(SuggestionMap.getSuggestions(symbolicName));
+                }
+            });
             suggestionContext.syntaxErrorContext = errorContext;
         }
 
@@ -111,7 +120,7 @@ public class RsqlSuggestionHelper {
     public static class SyntaxErrorContext {
         private int tokenStart;
         private int tokenEnd;
-        private List<String> suggestions = new ArrayList<>();
+        private final List<String> suggestions = new ArrayList<>();
 
         public List<String> getSuggestions() {
             return suggestions;
@@ -127,9 +136,9 @@ public class RsqlSuggestionHelper {
 
         @Override
         public String toString() {
-            return "SyntaxErrorContext [suggestions=" + suggestions + "]";
+            return "SyntaxErrorContext [tokenStart=" + tokenStart + ", tokenEnd=" + tokenEnd + ", suggestions="
+                    + suggestions + "]";
         }
-
     }
 
     public static class CursorPositionSuggestionContext {

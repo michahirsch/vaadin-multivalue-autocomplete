@@ -14,7 +14,7 @@ public class ExampleView extends VerticalLayout implements View {
     @Override
     public void enter(final ViewChangeEvent event) {
         final AutocompleteTextfield textField = new AutocompleteTextfield();
-        textField.setWidth("200px");
+        textField.setWidth("400px");
         addComponent(textField);
     }
 }

@@ -12,9 +12,12 @@ public class AutocompleteTextfield extends TextField {
 
     private static final long serialVersionUID = 1L;
 
+    private SuggestionWindow suggestionWindow;
+
     public AutocompleteTextfield() {
         setImmediate(true);
         addShortcutListener(new CtrlSpaceShortCutListener());
+        addShortcutListener(new SpaceCloseWindowListener());
         setTextChangeEventMode(TextChangeEventMode.EAGER);
         addTextChangeListener((event) -> textChanged(event));
     }
@@ -31,25 +34,38 @@ public class AutocompleteTextfield extends TextField {
             setComponentError(null);
         }
         if (parse.hasSuggestions() && showWindow) {
-            UI.getCurrent().addWindow(new SuggestionWindow(parse, new SuggestionWindow.SuggestionCallback() {
-                @Override
-                public void selected(final String suggestion) {
-                    int start;
-                    int end;
-                    if (parse.isSyntaxError()) {
-                        start = parse.getSyntaxErrorContext().getTokenStart();
-                        end = parse.getSyntaxErrorContext().getTokenEnd();
-                    } else {
-                        start = parse.getCursorPositionContext().getTokenStart();
-                        end = parse.getCursorPositionContext().getTokenEnd();
-                    }
+            if (suggestionWindow == null) {
+                suggestionWindow = new SuggestionWindow(new SuggestionWindow.SuggestionCallback() {
+                    @Override
+                    public void selected(final String suggestion) {
+                        int start;
+                        int end;
+                        if (parse.isSyntaxError()) {
+                            start = parse.getSyntaxErrorContext().getTokenStart();
+                            end = parse.getSyntaxErrorContext().getTokenEnd();
+                        } else {
+                            start = parse.getCursorPositionContext().getTokenStart();
+                            end = parse.getCursorPositionContext().getTokenEnd();
+                        }
 
-                    final StringBuilder builder = new StringBuilder(getValue());
-                    final int min = Math.min(start, end);
-                    builder.replace(min, min + suggestion.length(), suggestion);
-                    setValue(builder.toString());
-                }
-            }));
+                        String tmpSuggestion = suggestion;
+                        final String text = getValue();
+                        final StringBuilder builder = new StringBuilder(text);
+                        final int min = Math.max(Math.min(start, end), 0);
+                        if (min > 0) {
+                            tmpSuggestion = " " + tmpSuggestion;
+                        }
+                        builder.replace(start, end + 1, tmpSuggestion);
+                        setValue(builder.toString());
+                        suggestionWindow.close();
+                        suggestionWindow = null;
+                    }
+                });
+                UI.getCurrent().addWindow(suggestionWindow);
+            }
+            suggestionWindow.update(parse);
+        } else if (suggestionWindow != null) {
+            suggestionWindow.update(parse);
         }
     }
 
@@ -64,6 +80,23 @@ public class AutocompleteTextfield extends TextField {
         @Override
         public void handleAction(final Object sender, final Object target) {
             printOutSuggestions(AutocompleteTextfield.this.getValue(), true);
+        }
+    }
+
+    private final class SpaceCloseWindowListener extends ShortcutListener {
+
+        private static final long serialVersionUID = 1L;
+
+        public SpaceCloseWindowListener() {
+            super("Escape", KeyCode.ESCAPE, new int[] {});
+        }
+
+        @Override
+        public void handleAction(final Object sender, final Object target) {
+            if (suggestionWindow != null) {
+                suggestionWindow.close();
+                suggestionWindow = null;
+            }
         }
     }
 }

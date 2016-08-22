@@ -13,11 +13,13 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 public class SuggestionParseTreeListener implements ParseTreeListener {
 
     private final Map<Integer, Token> startStopMap = new HashMap<>();
+    private int longestToken = 0;
 
     @Override
     public void visitTerminal(final TerminalNode node) {
         final Token symbol = node.getSymbol();
         startStopMap.put(symbol.getType(), symbol);
+        longestToken = Math.max(longestToken, symbol.getStopIndex());
     }
 
     @Override
@@ -33,9 +35,10 @@ public class SuggestionParseTreeListener implements ParseTreeListener {
     }
 
     public Optional<Token> getTokenAtCursorPosition(final int cursorPos) {
+        final int maxCursorPos = Math.min(cursorPos, longestToken);
         return startStopMap.entrySet().stream()
                 .filter(keyvalue -> keyvalue.getValue().getStartIndex() <= cursorPos
-                        && keyvalue.getValue().getStopIndex() >= cursorPos)
+                        && keyvalue.getValue().getStopIndex() >= maxCursorPos)
                 .map(keyvalue -> keyvalue.getValue()).findFirst();
     }
 }

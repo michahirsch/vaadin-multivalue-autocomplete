@@ -9,8 +9,8 @@ public class RsqlTest {
     @Test
     public void rsqlTest() {
 
-        final String rsqlTest = "name == (a)";
-        final int cursorPos = 1;
+        final String rsqlTest = "name == \"a\" && name";
+        final int cursorPos = 11;
 
         final SuggestionContext parse = RsqlSuggestionHelper.parse(rsqlTest, cursorPos);
 

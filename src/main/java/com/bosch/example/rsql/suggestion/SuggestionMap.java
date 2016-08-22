@@ -8,10 +8,12 @@
  */
 package com.bosch.example.rsql.suggestion;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class SuggestionMap {
@@ -23,6 +25,8 @@ public class SuggestionMap {
                 .collect(Collectors.toList());
         final List<String> compOperators = Arrays.stream(OperatorSuggestions.values()).map(sel -> sel.getOpSymbol())
                 .collect(Collectors.toList());
+        final List<String> combiners = Arrays.stream(CombinerSuggestion.values()).map(sel -> sel.getSymbol())
+                .collect(Collectors.toList());
         compOperators.add("==");
         compOperators.add("!=");
         compOperators.add("=le=");
@@ -30,10 +34,12 @@ public class SuggestionMap {
 
         SUGGESTIONS.put("COMPARISONOP", compOperators);
         SUGGESTIONS.put("SELECTOR", selectors);
+        SUGGESTIONS.put("OP", combiners);
+        SUGGESTIONS.put("EOF", combiners);
     }
 
     public static List<String> getSuggestions(final String field) {
-        return SUGGESTIONS.get(field);
+        return Optional.ofNullable(SUGGESTIONS.get(field)).orElse(new ArrayList<>());
     }
 
 }
