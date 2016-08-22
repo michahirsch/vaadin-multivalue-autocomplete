@@ -10,6 +10,7 @@ package com.bosch.example.rsql.suggestion;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -52,7 +53,11 @@ public class RsqlSuggestionHelper {
         suggestionContext.syntaxError = errorListener.isErrorOccurred();
         if (errorListener.isErrorOccurred()) {
             final SyntaxErrorContext errorContext = new SyntaxErrorContext();
-            errorContext.suggestions = errorListener.getCurrentSuggestion();
+            final Token errorToken = errorListener.getErrorToken().getToken();
+            errorContext.tokenStart = errorToken.getStartIndex();
+            errorContext.tokenEnd = errorToken.getStopIndex();
+            errorContext.suggestions = SuggestionMap.getSuggestions(
+                    parser.getVocabulary().getSymbolicName(errorListener.getErrorToken().getExpectedTokenType()));
             suggestionContext.syntaxErrorContext = errorContext;
         }
 
@@ -88,6 +93,13 @@ public class RsqlSuggestionHelper {
             return syntaxError;
         }
 
+        public boolean hasSuggestions() {
+            return (syntaxErrorContext != null && syntaxErrorContext.suggestions != null
+                    && !syntaxErrorContext.suggestions.isEmpty())
+                    || (cursorPositionContext != null && cursorPositionContext.suggestions != null
+                            && !cursorPositionContext.suggestions.isEmpty());
+        }
+
         @Override
         public String toString() {
             return "SuggestionContext [syntaxError=" + syntaxError + ", syntaxErrorContext=" + syntaxErrorContext
@@ -97,10 +109,20 @@ public class RsqlSuggestionHelper {
     }
 
     public static class SyntaxErrorContext {
-        private List<String> suggestions;
+        private int tokenStart;
+        private int tokenEnd;
+        private List<String> suggestions = new ArrayList<>();
 
         public List<String> getSuggestions() {
             return suggestions;
+        }
+
+        public int getTokenStart() {
+            return tokenStart;
+        }
+
+        public int getTokenEnd() {
+            return tokenEnd;
         }
 
         @Override
@@ -114,7 +136,7 @@ public class RsqlSuggestionHelper {
         private int tokenStart;
         private int tokenEnd;
         private int currentCursor;
-        private List<String> suggestions;
+        private List<String> suggestions = new ArrayList<>();
 
         public int getTokenStart() {
             return tokenStart;

@@ -1,37 +1,29 @@
 package com.bosch.example.rsql.suggestion;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.antlr.v4.runtime.BaseErrorListener;
+import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
-import org.antlr.v4.runtime.misc.IntervalSet;
 
 import rsql.RsqlParser;
 
 public class SuggestionErrorListener extends BaseErrorListener {
 
-    private List<String> currentSuggestion = new ArrayList<String>();
+    private SuggestionToken errorToken;
     private boolean errorOccurred;
 
     @Override
     public void syntaxError(final Recognizer<?, ?> arg0, final Object arg1, final int arg2, final int arg3,
             final String arg4, final RecognitionException arg5) {
         final RsqlParser parser = (RsqlParser) arg0;
-        final IntervalSet expectedTokensWithinCurrentRule = parser.getExpectedTokensWithinCurrentRule();
-        final String symbolicName = parser.getVocabulary()
-                .getSymbolicName(expectedTokensWithinCurrentRule.getMinElement());
-        currentSuggestion = SuggestionMap.getSuggestions(symbolicName);
+        final CommonToken token = (CommonToken) arg1;
+
+        errorToken = new SuggestionToken(token, parser.getExpectedTokensWithinCurrentRule().getMinElement());
         errorOccurred = true;
     }
 
-    public List<String> getCurrentSuggestion() {
-        return currentSuggestion;
-    }
-
-    public void setCurrentSuggestion(final List<String> currentSuggestion) {
-        this.currentSuggestion = currentSuggestion;
+    public SuggestionToken getErrorToken() {
+        return errorToken;
     }
 
     public boolean isErrorOccurred() {
