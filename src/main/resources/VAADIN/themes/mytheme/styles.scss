@@ -1,0 +1,13 @@
+@import '../valo/valo';
+
+.mytheme {
+  @include valo;
+  
+  .autocomplete {
+  .autocomplete-select {
+     overflow: hidden !important;
+     font-size: 13px;
+   } 
+}
+}
+ 
