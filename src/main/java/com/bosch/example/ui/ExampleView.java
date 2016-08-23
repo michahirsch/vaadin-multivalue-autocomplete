@@ -1,6 +1,7 @@
 package com.bosch.example.ui;
 
 import com.bosch.example.ui.component.AutocompleteTextfield;
+import com.bosch.example.ui.component.TextFieldSuggestionBox;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.spring.annotation.SpringView;
@@ -13,8 +14,12 @@ public class ExampleView extends VerticalLayout implements View {
 
     @Override
     public void enter(final ViewChangeEvent event) {
+
+        this.setSizeFull();
+
         final AutocompleteTextfield textField = new AutocompleteTextfield();
-        textField.setWidth("400px");
+        new TextFieldSuggestionBox(textField);
+        textField.setWidth("800px");
         addComponent(textField);
     }
 }

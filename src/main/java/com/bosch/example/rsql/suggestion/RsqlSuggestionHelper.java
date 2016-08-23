@@ -9,6 +9,7 @@
 package com.bosch.example.rsql.suggestion;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
@@ -84,8 +85,9 @@ public class RsqlSuggestionHelper {
         return suggestionContext;
     }
 
-    public static class SuggestionContext {
+    public static class SuggestionContext implements Serializable {
 
+        private static final long serialVersionUID = 1L;
         private boolean syntaxError;
         private SyntaxErrorContext syntaxErrorContext;
         private CursorPositionSuggestionContext cursorPositionContext;
@@ -117,7 +119,8 @@ public class RsqlSuggestionHelper {
 
     }
 
-    public static class SyntaxErrorContext {
+    public static class SyntaxErrorContext implements Serializable {
+        private static final long serialVersionUID = 1L;
         private int tokenStart;
         private int tokenEnd;
         private final List<String> suggestions = new ArrayList<>();
@@ -141,7 +144,8 @@ public class RsqlSuggestionHelper {
         }
     }
 
-    public static class CursorPositionSuggestionContext {
+    public static class CursorPositionSuggestionContext implements Serializable {
+        private static final long serialVersionUID = 1L;
         private int tokenStart;
         private int tokenEnd;
         private int currentCursor;

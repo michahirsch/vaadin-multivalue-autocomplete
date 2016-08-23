@@ -2,17 +2,23 @@ package com.bosch.example.ui;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.vaadin.annotations.Push;
+import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.Widgetset;
 import com.vaadin.navigator.Navigator;
 import com.vaadin.server.VaadinRequest;
+import com.vaadin.shared.communication.PushMode;
 import com.vaadin.spring.annotation.SpringUI;
 import com.vaadin.spring.navigator.SpringViewProvider;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.themes.ValoTheme;
 
 @SpringUI
-@Widgetset("com.bosch.example.AppWidgetSet")
+@Widgetset("com.bosch.example.ui.component.AppWidgetSet")
+@Push(value = PushMode.AUTOMATIC)
+@Theme(ValoTheme.THEME_NAME)
 public class ExampleUI extends UI {
 
     private static final long serialVersionUID = 1L;
@@ -27,6 +33,7 @@ public class ExampleUI extends UI {
      */
     @Override
     protected void init(final VaadinRequest request) {
+
         final VerticalLayout root = new VerticalLayout();
         root.setSizeFull();
         root.setMargin(true);

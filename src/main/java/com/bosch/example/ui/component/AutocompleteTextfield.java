@@ -27,45 +27,46 @@ public class AutocompleteTextfield extends TextField {
     }
 
     private void printOutSuggestions(final String rsqlText, final boolean showWindow) {
+
         final SuggestionContext parse = RsqlSuggestionHelper.parse(rsqlText, getCursorPosition());
+
         if (parse.isSyntaxError()) {
             setComponentError(new UserError("Syntax Error"));
         } else {
             setComponentError(null);
         }
         if (parse.hasSuggestions() && showWindow) {
-            if (suggestionWindow == null) {
-                suggestionWindow = new SuggestionWindow(new SuggestionWindow.SuggestionCallback() {
-                    @Override
-                    public void selected(final String suggestion) {
-                        int start;
-                        int end;
-                        if (parse.isSyntaxError()) {
-                            start = parse.getSyntaxErrorContext().getTokenStart();
-                            end = parse.getSyntaxErrorContext().getTokenEnd();
-                        } else {
-                            start = parse.getCursorPositionContext().getTokenStart();
-                            end = parse.getCursorPositionContext().getTokenEnd();
-                        }
-
-                        String tmpSuggestion = suggestion;
-                        final String text = getValue();
-                        final StringBuilder builder = new StringBuilder(text);
-                        final int min = Math.max(Math.min(start, end), 0);
-                        if (min > 0) {
-                            tmpSuggestion = " " + tmpSuggestion;
-                        }
-                        builder.replace(start, end + 1, tmpSuggestion);
-                        setValue(builder.toString());
-                        suggestionWindow.close();
-                        suggestionWindow = null;
-                    }
-                });
-                UI.getCurrent().addWindow(suggestionWindow);
+            if (suggestionWindow != null) {
+                suggestionWindow.close();
+                suggestionWindow = null;
             }
-            suggestionWindow.update(parse);
-        } else if (suggestionWindow != null) {
-            suggestionWindow.update(parse);
+            suggestionWindow = new SuggestionWindow(new SuggestionWindow.SuggestionCallback() {
+                @Override
+                public void selected(final String suggestion) {
+                    int start;
+                    int end;
+                    if (parse.isSyntaxError()) {
+                        start = parse.getSyntaxErrorContext().getTokenStart();
+                        end = parse.getSyntaxErrorContext().getTokenEnd();
+                    } else {
+                        start = parse.getCursorPositionContext().getTokenStart();
+                        end = parse.getCursorPositionContext().getTokenEnd();
+                    }
+
+                    String tmpSuggestion = suggestion;
+                    final String text = getValue();
+                    final StringBuilder builder = new StringBuilder(text);
+                    final int min = Math.max(Math.min(start, end), 0);
+                    if (min > 0) {
+                        tmpSuggestion = " " + tmpSuggestion;
+                    }
+                    builder.replace(start, end + 1, tmpSuggestion);
+                    setValue(builder.toString());
+                    suggestionWindow.close();
+                    suggestionWindow = null;
+                }
+            });
+            UI.getCurrent().addWindow(suggestionWindow);
         }
     }
 
@@ -79,7 +80,7 @@ public class AutocompleteTextfield extends TextField {
 
         @Override
         public void handleAction(final Object sender, final Object target) {
-            printOutSuggestions(AutocompleteTextfield.this.getValue(), true);
+            printOutSuggestions(AutocompleteTextfield.this.getValue(), false);
         }
     }
 
