@@ -13,12 +13,11 @@ import com.vaadin.spring.navigator.SpringViewProvider;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
 
 @SpringUI
 @Widgetset("com.bosch.example.ui.component.AppWidgetSet")
 @Push(value = PushMode.AUTOMATIC)
-@Theme(ValoTheme.THEME_NAME)
+@Theme("mytheme")
 public class ExampleUI extends UI {
 
     private static final long serialVersionUID = 1L;
