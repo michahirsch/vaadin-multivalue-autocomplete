@@ -1,7 +1,5 @@
 package com.bosch.example.rsql.suggestion;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -10,9 +8,11 @@ import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
+import com.google.gwt.thirdparty.guava.common.collect.ArrayListMultimap;
+
 public class SuggestionParseTreeListener implements ParseTreeListener {
 
-    private final Map<Integer, Token> startStopMap = new HashMap<>();
+    private final ArrayListMultimap<Integer, Token> startStopMap = ArrayListMultimap.create();
     private int longestToken = 0;
 
     @Override
@@ -36,7 +36,7 @@ public class SuggestionParseTreeListener implements ParseTreeListener {
 
     public Optional<Token> getTokenAtCursorPosition(final int cursorPos) {
         final int maxCursorPos = Math.min(cursorPos, longestToken);
-        return startStopMap.entrySet().stream()
+        return startStopMap.entries().stream()
                 .filter(keyvalue -> keyvalue.getValue().getStartIndex() <= cursorPos
                         && keyvalue.getValue().getStopIndex() >= maxCursorPos)
                 .map(keyvalue -> keyvalue.getValue()).findFirst();

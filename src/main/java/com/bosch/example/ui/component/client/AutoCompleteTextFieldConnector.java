@@ -33,17 +33,30 @@ public class AutoCompleteTextFieldConnector extends AbstractExtensionConnector {
 
         registerRpc(AutocompleteTextFieldClientRpc.class, new AutocompleteTextFieldClientRpc() {
             @Override
-            public void showSuggestions(final ClientSuggestionTokenContext context) {
+            public void showSuggestions(final ClientSuggestionTokenContext errorContext,
+                    final ClientSuggestionTokenContext cursorContext) {
                 select.clear();
-                final List<String> suggestions = context.getSuggestions();
-                if (suggestions != null && !suggestions.isEmpty()) {
-                    for (final String suggestion : suggestions) {
-                        select.addItem(context.getTokenStart(), context.getTokenEnd(), suggestion);
+                if (errorContext != null) {
+                    final List<String> errorSuggestions = errorContext.getSuggestions();
+                    if (errorSuggestions != null) {
+                        for (final String suggestion : errorSuggestions) {
+                            select.addItem(errorContext.getTokenStart(), errorContext.getTokenEnd(), suggestion);
+                        }
                     }
-                    panel.showRelativeTo(textFieldWidget);
-                } else {
-                    panel.hide();
+                } else if (cursorContext != null) {
+                    final List<String> cursorSuggestions = cursorContext.getSuggestions();
+                    if (cursorSuggestions != null && !cursorSuggestions.isEmpty()) {
+                        for (final String suggestion : cursorSuggestions) {
+                            select.addItem(cursorContext.getTokenStart(), cursorContext.getTokenEnd(), suggestion);
+                        }
+                    }
                 }
+
+                if (select.getOptionsContainer().getItemCount() > 0) {
+                    panel.showRelativeTo(textFieldWidget);
+                    return;
+                }
+                panel.hide();
             }
         });
     }
@@ -74,7 +87,14 @@ public class AutoCompleteTextFieldConnector extends AbstractExtensionConnector {
             @Override
             public void onKeyDown(final KeyDownEvent event) {
                 if (event.getNativeKeyCode() == KeyCodes.KEY_DOWN) {
-                    select.focus();
+                    if (select.isVisible()) {
+                        select.focus();
+                        if (select.getOptionsContainer().getItemCount() > 0 && select.getSelectedItem() == null) {
+                            select.getOptionsContainer().setItemSelected(0, true);
+                        }
+                    }
+                } else if (event.getNativeKeyCode() == KeyCodes.KEY_ESCAPE) {
+                    panel.hide();
                 }
             }
         }, KeyDownEvent.getType());
@@ -83,7 +103,8 @@ public class AutoCompleteTextFieldConnector extends AbstractExtensionConnector {
             @Override
             public void onKeyUp(final KeyUpEvent event) {
                 panel.hide();
-                rpc.getSuggestions(textFieldWidget.getValue(), textFieldWidget.getCursorPos());
+                final int cursorPos = textFieldWidget.getCursorPos();
+                rpc.getSuggestions(textFieldWidget.getValue(), cursorPos);
             }
         }, KeyUpEvent.getType());
     }

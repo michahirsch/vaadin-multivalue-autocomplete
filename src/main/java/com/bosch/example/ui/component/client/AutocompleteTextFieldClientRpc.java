@@ -4,6 +4,7 @@ import com.vaadin.shared.communication.ClientRpc;
 
 public interface AutocompleteTextFieldClientRpc extends ClientRpc {
 
-    void showSuggestions(final ClientSuggestionTokenContext syntaxErrorSuggestion);
+    void showSuggestions(final ClientSuggestionTokenContext syntaxErrorSuggestion,
+            final ClientSuggestionTokenContext cursorSuggestions);
 
 }
