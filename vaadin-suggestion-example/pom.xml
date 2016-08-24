@@ -33,14 +33,7 @@
       </dependency>
       <dependency>
          <groupId>org.springframework.boot</groupId>
-         <artifactId>spring-boot-starter</artifactId>
-         <version>${spring-boot.version}</version>
-         <exclusions>
-            <exclusion>
-               <groupId>org.springframework.boot</groupId>
-               <artifactId>spring-boot-starter-logging</artifactId>
-            </exclusion>
-         </exclusions>
+         <artifactId>spring-boot-starter-logging</artifactId>
       </dependency>
       <dependency>
          <groupId>com.vaadin</groupId>
