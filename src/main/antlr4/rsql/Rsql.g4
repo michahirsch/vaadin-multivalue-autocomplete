@@ -1,6 +1,6 @@
 grammar Rsql;
 
-expr: (SELECTOR SPACE COMPARISONOP SPACE ARGUMENTS ( SPACE? OP SPACE expr)*) EOF;
+expr: (SELECTOR COMPARISONOP ARGUMENTS ( OP SPACE expr)*) EOF;
 
 
 OP : '&&'|'||';
@@ -22,7 +22,5 @@ ARGUMENTS    : VALUE | ( '(' (VALUE | ',' VALUE) ')' );
 VALUE        : ('"' | '\'') (ESC | ~ ["\\])* ('"' | '\'')
              ;
              
-             
-SPACE : ' ';
 
-WS: [ \n\t\r] ->skip;
+WS: [ \n\t\r] -> channel(HIDDEN);
