@@ -17,14 +17,21 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.vaadin.client.UIDL;
 import com.vaadin.client.ui.VOptionGroupBase;
 
-public class MyListSelect extends VOptionGroupBase {
+/**
+ * Holds the suggestions list.
+ *
+ */
+public class SuggestionsSelectList extends VOptionGroupBase {
 
     public static final String CLASSNAME = "autocomplete";
 
     protected ListBox select;
     private final Map<String, TokenStartEnd> tokenMap = new HashMap<>();
 
-    public MyListSelect() {
+    /**
+     * Constructor.
+     */
+    public SuggestionsSelectList() {
         super(new ListBox(), CLASSNAME);
         select = getOptionsContainer();
         select.setVisibleItemCount(10);
@@ -106,10 +113,20 @@ public class MyListSelect extends VOptionGroupBase {
         select.setEnabled(isEnabled() && !isReadonly());
     }
 
+    /**
+     * Suggestion Token start and end index.
+     *
+     */
     public class TokenStartEnd {
         final int start;
         final int end;
 
+        /**
+         * Constructor.
+         * 
+         * @param start
+         * @param end
+         */
         public TokenStartEnd(final int start, final int end) {
             this.start = start;
             this.end = end;

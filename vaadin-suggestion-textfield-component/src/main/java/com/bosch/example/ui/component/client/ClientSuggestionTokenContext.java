@@ -12,7 +12,7 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * @author Michael Hirsch
+ * Suggestion tokens for the client side widget.
  *
  */
 public class ClientSuggestionTokenContext implements Serializable {
@@ -22,10 +22,20 @@ public class ClientSuggestionTokenContext implements Serializable {
     private int tokenEnd;
     private List<String> suggestions;
 
+    /**
+     * Default Constructor.
+     */
     public ClientSuggestionTokenContext() {
 
     }
 
+    /**
+     * Constructor.
+     * 
+     * @param tokenStart
+     * @param tokenEnd
+     * @param suggestions
+     */
     public ClientSuggestionTokenContext(final int tokenStart, final int tokenEnd, final List<String> suggestions) {
         this.tokenStart = tokenStart;
         this.tokenEnd = tokenEnd;

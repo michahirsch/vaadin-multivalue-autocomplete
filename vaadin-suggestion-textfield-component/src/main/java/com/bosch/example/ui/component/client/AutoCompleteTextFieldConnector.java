@@ -1,9 +1,17 @@
+/**
+ * Copyright (c) 2015 Bosch Software Innovations GmbH and others.
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ */
 package com.bosch.example.ui.component.client;
 
 import java.util.List;
 
 import com.bosch.example.ui.component.TextFieldSuggestionBox;
-import com.bosch.example.ui.component.client.MyListSelect.TokenStartEnd;
+import com.bosch.example.ui.component.client.SuggestionsSelectList.TokenStartEnd;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
@@ -16,13 +24,17 @@ import com.vaadin.client.extensions.AbstractExtensionConnector;
 import com.vaadin.client.ui.VTextField;
 import com.vaadin.shared.ui.Connect;
 
+/**
+ * Connector for the AutoCompleteTextField.
+ *
+ */
 @Connect(TextFieldSuggestionBox.class)
 public class AutoCompleteTextFieldConnector extends AbstractExtensionConnector {
 
     private static final long serialVersionUID = 1L;
 
     AutoCompleteTextFieldServerRpc rpc = getRpcProxy(AutoCompleteTextFieldServerRpc.class);
-    final MyListSelect select = new MyListSelect();
+    final SuggestionsSelectList select = new SuggestionsSelectList();
     final PopupPanel panel = new PopupPanel(true, false);
 
     private VTextField textFieldWidget;
