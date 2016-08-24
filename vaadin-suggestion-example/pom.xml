@@ -19,6 +19,11 @@
    <dependencies>
       <dependency>
          <groupId>com.bosch.example</groupId>
+         <artifactId>antl-rsql-suggestion</artifactId>
+         <version>${project.version}</version>
+      </dependency>
+      <dependency>
+         <groupId>com.bosch.example</groupId>
          <artifactId>vaadin-suggestion-textfield-component</artifactId>
          <version>${project.version}</version>
       </dependency>

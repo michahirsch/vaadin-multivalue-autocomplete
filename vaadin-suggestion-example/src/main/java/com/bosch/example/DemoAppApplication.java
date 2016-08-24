@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Bean;
 import com.bosch.example.rsql.SuggestContext;
 import com.bosch.example.rsql.SuggestOracle;
 import com.bosch.example.rsql.TokenSuggestionContext;
+import com.bosch.example.rsql.suggestion.AntlrSuggestOracle;
 import com.vaadin.spring.annotation.EnableVaadin;
 
 @SpringBootApplication
@@ -19,7 +20,7 @@ public class DemoAppApplication {
 
     @Bean
     public SuggestOracle suggestOracle() {
-        return new DummySuggestOracle();
+        return new AntlrSuggestOracle();
     }
 
     private static final class DummySuggestOracle implements SuggestOracle {
