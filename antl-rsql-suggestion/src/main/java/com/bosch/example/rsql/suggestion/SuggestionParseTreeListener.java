@@ -8,11 +8,12 @@ import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
-import com.google.gwt.thirdparty.guava.common.collect.ArrayListMultimap;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 
 public class SuggestionParseTreeListener implements ParseTreeListener {
 
-    private final ArrayListMultimap<Integer, Token> startStopMap = ArrayListMultimap.create();
+    private final Multimap<Integer, Token> startStopMap = ArrayListMultimap.create();
     private int longestToken = 0;
 
     @Override

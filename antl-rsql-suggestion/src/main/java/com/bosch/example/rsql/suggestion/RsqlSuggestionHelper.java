@@ -23,7 +23,7 @@ import org.antlr.v4.runtime.TokenSource;
 import org.antlr.v4.runtime.TokenStream;
 import org.antlr.v4.runtime.misc.IntervalSet;
 
-import com.google.gwt.thirdparty.guava.common.base.Throwables;
+import com.google.common.base.Throwables;
 
 import rsql.RsqlLexer;
 import rsql.RsqlParser;

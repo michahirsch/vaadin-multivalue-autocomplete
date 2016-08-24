@@ -1,9 +1,8 @@
 package com.bosch.example.ui.component;
 
-import com.bosch.example.rsql.suggestion.RsqlSuggestionHelper;
-import com.bosch.example.rsql.suggestion.RsqlSuggestionHelper.CursorPositionSuggestionContext;
-import com.bosch.example.rsql.suggestion.RsqlSuggestionHelper.SuggestionContext;
-import com.bosch.example.rsql.suggestion.RsqlSuggestionHelper.SyntaxErrorContext;
+import com.bosch.example.rsql.SuggestContext;
+import com.bosch.example.rsql.SuggestOracle;
+import com.bosch.example.rsql.TokenSuggestionContext;
 import com.bosch.example.ui.component.client.AutoCompleteTextFieldServerRpc;
 import com.bosch.example.ui.component.client.AutocompleteTextFieldClientRpc;
 import com.bosch.example.ui.component.client.ClientSuggestionTokenContext;
@@ -13,28 +12,31 @@ public class TextFieldSuggestionBox extends AbstractExtension implements AutoCom
 
     private static final long serialVersionUID = 1L;
     private final AutocompleteTextfield textField;
+    private final SuggestOracle suggestOracle;
 
-    public TextFieldSuggestionBox(final AutocompleteTextfield textField) {
+    public TextFieldSuggestionBox(final AutocompleteTextfield textField, final SuggestOracle suggestOracle) {
         this.textField = textField;
+        this.suggestOracle = suggestOracle;
         extend(textField);
         registerRpc(this, AutoCompleteTextFieldServerRpc.class);
     }
 
     @Override
     public void getSuggestions(final String queryText, final int cursor) {
-        final SuggestionContext parse = RsqlSuggestionHelper.parse(queryText, cursor);
-        final SyntaxErrorContext syntaxErrorContext = parse.getSyntaxErrorContext();
-        final CursorPositionSuggestionContext cursorPositionContext = parse.getCursorPositionContext();
+        final SuggestContext context = suggestOracle.getSuggestion(queryText, cursor);
+
         ClientSuggestionTokenContext syntaxErrorSuggestions = null;
         ClientSuggestionTokenContext cursorSuggestions = null;
-        if (syntaxErrorContext != null) {
-            syntaxErrorSuggestions = new ClientSuggestionTokenContext(syntaxErrorContext.getTokenStart(),
-                    syntaxErrorContext.getTokenEnd(), syntaxErrorContext.getSuggestions());
-        }
 
-        if (cursorPositionContext != null) {
-            cursorSuggestions = new ClientSuggestionTokenContext(cursorPositionContext.getTokenStart(),
-                    cursorPositionContext.getTokenEnd(), cursorPositionContext.getSuggestions());
+        if (context.getSyntaxErrorContext() != null) {
+            final TokenSuggestionContext syntaxErrorContext = context.getSyntaxErrorContext();
+            syntaxErrorSuggestions = new ClientSuggestionTokenContext(syntaxErrorContext.getStart(),
+                    syntaxErrorContext.getEnd(), syntaxErrorContext.getSuggestions());
+        }
+        if (context.getCursorContext() != null) {
+            final TokenSuggestionContext cursorErrorContext = context.getCursorContext();
+            cursorSuggestions = new ClientSuggestionTokenContext(cursorErrorContext.getStart(),
+                    cursorErrorContext.getEnd(), cursorErrorContext.getSuggestions());
         }
         getRpcProxy(AutocompleteTextFieldClientRpc.class).showSuggestions(syntaxErrorSuggestions, cursorSuggestions);
     }
