@@ -1,0 +1,19 @@
+grammar org.xtext.example.mydsl.MyDsl with org.eclipse.xtext.common.Terminals
+
+generate myDsl "http://www.xtext.org/example/mydsl/MyDsl"
+
+
+Module:
+	conditions+=Condition (op+=('&&'|'and'|'||'|'or'|';'|',') conditions+=Condition)*;
+
+Condition:
+	   left=('name' |'description'| 'controllerId' | 'updatestatus' | 'ipaddress'| 'attribute'| 'assigndds'| 'installedds' | 'tag' | 'lastcontrollerrequestat')
+	   op=('=='|'!=' | '>' | '<' | '>=' | '<='|'=le=' | '=ge=' | '=lt=' | '=gt=' | '=in=' | '=out=') 
+	   right=Argument
+	   ;
+
+Argument:
+	string=STRING | int=INT;
+
+terminal VALUE:
+	('a'..'z'|'A'..'Z'|'*'|'0'..'9')*;
