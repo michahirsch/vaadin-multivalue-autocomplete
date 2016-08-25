@@ -26,7 +26,7 @@ public class ClientSuggestionTokenContext implements Serializable {
      * Default Constructor.
      */
     public ClientSuggestionTokenContext() {
-
+        // Needed for making RPC calls.
     }
 
     /**
