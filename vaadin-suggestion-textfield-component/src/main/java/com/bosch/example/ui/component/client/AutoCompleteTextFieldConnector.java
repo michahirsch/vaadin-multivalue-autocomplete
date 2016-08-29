@@ -11,15 +11,14 @@ package com.bosch.example.ui.component.client;
 import java.util.List;
 
 import com.bosch.example.ui.component.TextFieldSuggestionBox;
-import com.bosch.example.ui.component.client.SuggestionsSelectList.TokenStartEnd;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
-import com.google.gwt.event.dom.client.KeyUpEvent;
-import com.google.gwt.event.dom.client.KeyUpHandler;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.vaadin.client.ComponentConnector;
 import com.vaadin.client.ServerConnector;
+import com.vaadin.client.VConsole;
 import com.vaadin.client.extensions.AbstractExtensionConnector;
 import com.vaadin.client.ui.VTextField;
 import com.vaadin.shared.ui.Connect;
@@ -34,10 +33,10 @@ public class AutoCompleteTextFieldConnector extends AbstractExtensionConnector {
     private static final long serialVersionUID = 1L;
 
     AutoCompleteTextFieldServerRpc rpc = getRpcProxy(AutoCompleteTextFieldServerRpc.class);
-    final SuggestionsSelectList select = new SuggestionsSelectList();
     final PopupPanel panel = new PopupPanel(true, false);
 
     private VTextField textFieldWidget;
+    private CustomMenubar customMenubar;
 
     @Override
     protected void init() {
@@ -47,24 +46,22 @@ public class AutoCompleteTextFieldConnector extends AbstractExtensionConnector {
             @Override
             public void showSuggestions(final ClientSuggestionTokenContext errorContext,
                     final ClientSuggestionTokenContext cursorContext) {
-                select.clear();
+                customMenubar.clearItems();
                 if (errorContext != null) {
                     final List<String> errorSuggestions = errorContext.getSuggestions();
                     if (errorSuggestions != null) {
-                        for (final String suggestion : errorSuggestions) {
-                            select.addItem(errorContext.getTokenStart(), errorContext.getTokenEnd(), suggestion);
-                        }
+                        customMenubar.setSuggestions(errorSuggestions, errorContext.getTokenStart(),
+                                errorContext.getTokenEnd());
                     }
                 } else if (cursorContext != null) {
                     final List<String> cursorSuggestions = cursorContext.getSuggestions();
                     if (cursorSuggestions != null && !cursorSuggestions.isEmpty()) {
-                        for (final String suggestion : cursorSuggestions) {
-                            select.addItem(cursorContext.getTokenStart(), cursorContext.getTokenEnd(), suggestion);
-                        }
+                        customMenubar.setSuggestions(cursorSuggestions, cursorContext.getTokenStart(),
+                                cursorContext.getTokenEnd());
                     }
                 }
 
-                if (select.getOptionsContainer().getItemCount() > 0) {
+                if (customMenubar.getItems().size() > 0) {
                     panel.showRelativeTo(textFieldWidget);
                     return;
                 }
@@ -76,49 +73,115 @@ public class AutoCompleteTextFieldConnector extends AbstractExtensionConnector {
     @Override
     protected void extend(final ServerConnector target) {
         textFieldWidget = (VTextField) ((ComponentConnector) target).getWidget();
-
-        select.setEnabled(true);
-
-        panel.add(select);
-
-        select.addDomHandler(new KeyDownHandler() {
-            @Override
-            public void onKeyDown(final KeyDownEvent event) {
-                if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
-                    final TokenStartEnd tokenStartEnd = select.getTokenStartEnd(select.getSelectedItem());
-                    rpc.suggestionSelected(select.getSelectedItem(), tokenStartEnd.getStart(), tokenStartEnd.getEnd(),
-                            textFieldWidget.getCursorPos());
-                    panel.hide();
-                    textFieldWidget.setFocus(true);
-
-                }
-            }
-        }, KeyDownEvent.getType());
+        customMenubar = new CustomMenubar(true, rpc, textFieldWidget, panel);
+        panel.setWidget(customMenubar);
+        panel.setStyleName("suggestion-popup");
+        // panel.add(select);
 
         textFieldWidget.addDomHandler(new KeyDownHandler() {
             @Override
             public void onKeyDown(final KeyDownEvent event) {
-                if (event.getNativeKeyCode() == KeyCodes.KEY_DOWN) {
-                    if (select.isVisible()) {
-                        select.focus();
-                        if (select.getOptionsContainer().getItemCount() > 0 && select.getSelectedItem() == null) {
-                            select.getOptionsContainer().setItemSelected(0, true);
-                        }
-                    }
-                } else if (event.getNativeKeyCode() == KeyCodes.KEY_ESCAPE) {
-                    panel.hide();
+                customMenubar.focus();
+                if (panel.isAttached()) {
+                    VConsole.error("in key down event inside the condition " + event);
+                    popupKeyDown(event);
+                } else {
+                    inputFieldKeyDown(event);
                 }
             }
         }, KeyDownEvent.getType());
+    }
 
-        textFieldWidget.addDomHandler(new KeyUpHandler() {
-            @Override
-            public void onKeyUp(final KeyUpEvent event) {
+    /**
+     * Triggered when a key was pressed in the suggestion popup.
+     * 
+     * @param event
+     *            The KeyDownEvent of the key
+     */
+    private void popupKeyDown(final KeyDownEvent event) {
+        // Propagation of handled events is stopped so other handlers such as
+        // shortcut key handlers do not also handle the same events.
+        VConsole.error("in popupKeyDown event " + event);
+        switch (event.getNativeKeyCode()) {
+        case KeyCodes.KEY_DOWN:
+            VConsole.error("in case KeyCodes.KEY_DOWN " + event);
+            selectNextItem();
+            DOM.eventPreventDefault(DOM.eventGetCurrentEvent());
+            event.stopPropagation();
+            break;
+        case KeyCodes.KEY_UP:
+            VConsole.error("in case KeyCodes.KEY_UP" + event);
+            selectPrevItem();
+            DOM.eventPreventDefault(DOM.eventGetCurrentEvent());
+            event.stopPropagation();
+            break;
+        case KeyCodes.KEY_ESCAPE:
+            VConsole.error("in  case KeyCodes.KEY_ESCAPE:" + event);
+            reset();
+            panel.hide();
+            DOM.eventPreventDefault(DOM.eventGetCurrentEvent());
+            event.stopPropagation();
+            break;
+        case KeyCodes.KEY_TAB:
+        case KeyCodes.KEY_ENTER:
+            VConsole.error("in  case KeyCodes.KEY_TAB: case KeyCodes.KEY_ENTER:" + event);
+            final int selected = customMenubar.getSelectedIndex();
+            if (selected != -1) {
+                customMenubar.doItemAction(customMenubar.getItems().get(selected), true);
+            } else {
                 panel.hide();
-                final int cursorPos = textFieldWidget.getCursorPos();
-                rpc.getSuggestions(textFieldWidget.getValue(), cursorPos);
             }
-        }, KeyUpEvent.getType());
+            event.stopPropagation();
+            break;
+        }
+
+    }
+
+    /**
+     * Triggered when a key is pressed in the text box
+     * 
+     * @param event
+     *            The KeyDownEvent
+     */
+    private void inputFieldKeyDown(final KeyDownEvent event) {
+        VConsole.error("in inputFieldKeyDown" + event.getNativeKeyCode());
+        panel.hide();
+        final int cursorPos = textFieldWidget.getCursorPos();
+        rpc.getSuggestions(textFieldWidget.getValue(), cursorPos);
+    }
+
+    private void reset() {
+        VConsole.error("in reset");
+        panel.hide();
+    }
+
+    /**
+     * Selects the next item in the filtered selections
+     */
+    private void selectNextItem() {
+        VConsole.error("in selectNextItem");
+        final int index = customMenubar.getSelectedIndex() + 1;
+        VConsole.error("in selectNextItem the index = " + index);
+        if (customMenubar.getItems().size() > index) {
+            customMenubar.selectItem(customMenubar.getItems().get(index));
+
+        }
+    }
+
+    /**
+     * Selects the previous item in the filtered selections
+     */
+    public void selectPrevItem() {
+        VConsole.error("in selectPrevItem");
+        final int index = customMenubar.getSelectedIndex() - 1;
+        if (index > -1) {
+            customMenubar.selectItem(customMenubar.getItems().get(index));
+
+        } else {
+            if (!customMenubar.getItems().isEmpty()) {
+                customMenubar.selectItem(customMenubar.getLastItem());
+            }
+        }
     }
 
 }
