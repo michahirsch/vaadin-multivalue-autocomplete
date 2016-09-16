@@ -11,4 +11,33 @@
      width: 200px;
      padding: 5px;
    }
-  } 
+} 
+  .gwt-MenuBar {
+   cursor: default;  
+}
+.gwt-MenuBar .gwt-MenuItem {
+   border-radius: 3px !important;
+    cursor: pointer !important;
+    font-weight: 400 !important;
+    line-height: 27px !important;
+    padding: 0 20px 0 10px !important;
+    position: relative !important;
+    white-space: nowrap !important;
+}
+.gwt-MenuBar .gwt-MenuItem-selected {
+    background-color: #197de1 !important;
+    background-image: linear-gradient(to bottom, #1b87e3 2%, #166ed5 98%) !important;
+    color: #ecf2f8 !important;
+    text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.05) !important;
+}
+.suggestion-popup{
+	backface-visibility: hidden;
+    background-color: white;
+    border-radius: 4px;
+    box-shadow: 0 4px 10px 0 rgba(0, 0, 0, 0.1), 0 3px 5px 0 rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(0, 0, 0, 0.09);
+    box-sizing: border-box;
+    color: #474747;
+    padding: 4px;
+    position: relative;
+    z-index: 1;
+}
